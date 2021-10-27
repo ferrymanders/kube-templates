@@ -1,0 +1,71 @@
+###########################################
+### Deployment
+###########################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: nginx-php
+  name: nginx-php
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nginx-php
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nginx-php
+    spec:                     
+      containers:
+        # Nginx
+        - image: register.npohosting.nl/npohosting/nginx:1.17
+          imagePullPolicy: Always
+          name: nginx
+          command:
+            - /usr/libexec/s2i/run
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: nginx-config
+              subPath: nginx.conf
+              readOnly: true                                 
+            - mountPath: /phpsocket
+              name: phpsocket
+            - mountPath: /var/www/html
+              name: docroot
+        # php-fpm
+        - image: register.npohosting.nl/npohosting/php-fpm:7.4
+          imagePullPolicy: Always
+          name: php-fpm
+          command:
+            - /usr/libexec/s2i/run       
+          resources: {}
+          volumeMounts:
+            - mountPath: /usr/local/etc/php-fpm.d
+              name: php-fpm-config              
+            - mountPath: /phpsocket
+              name: phpsocket              
+            - mountPath: /var/www/html
+              name: docroot              
+      restartPolicy: Always
+      securityContext: {}
+      volumes: 
+        - name: phpsocket
+          emptyDir: {}
+        - name: docroot
+          emptyDir: {}
+        - name: nginx-config
+          configMap:
+            defaultMode: 420
+            name: nginx-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf                  
+        - name: php-fpm-config
+          configMap:
+            defaultMode: 420
+            name: php-fpm-config             
