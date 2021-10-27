@@ -19,7 +19,7 @@ spec:
     spec:                     
       containers:
         # Nginx
-        - image: register.npohosting.nl/npohosting/nginx:1.17
+        - image: registry.npohosting.nl/npohosting/nginx:1.17
           imagePullPolicy: Always
           name: nginx
           command:
@@ -38,7 +38,7 @@ spec:
             - mountPath: /var/www/html
               name: docroot
         # php-fpm
-        - image: register.npohosting.nl/npohosting/php-fpm:7.4
+        - image: registry.npohosting.nl/npohosting/php-fpm:7.4
           imagePullPolicy: Always
           name: php-fpm
           command:
